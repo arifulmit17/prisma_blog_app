@@ -3,6 +3,7 @@ import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { _length } from './../../../node_modules/zod/src/v4/core/api';
 import { LimitNode } from './../../../node_modules/kysely/dist/esm/operation-node/limit-node';
+import { Request, Response } from "express";
 
 
 const createPost = async (data: Omit<Post , "id"|"createdAt"|"updatedAt">)=>{
@@ -82,7 +83,57 @@ const getAllPost=async(payload:{
     return allpost
 }
 
+const getPostById = async (postId: string) => {
+    return await prisma.$transaction(async (tx) => {
+        await tx.post.update({
+            where: {
+                id: postId
+            },
+            data: {
+                views: {
+                    increment: 1
+                }
+            }
+        })
+        const postData = await tx.post.findUnique({
+            where: {
+                id: postId
+            },
+            // include: {
+            //     comments: {
+            //         where: {
+            //             parentId: null,
+            //             status: CommentStatus.APPROVED
+            //         },
+            //         orderBy: { createdAt: "desc" },
+            //         include: {
+            //             replies: {
+            //                 where: {
+            //                     status: CommentStatus.APPROVED
+            //                 },
+            //                 orderBy: { createdAt: "asc" },
+            //                 include: {
+            //                     replies: {
+            //                         where: {
+            //                             status: CommentStatus.APPROVED
+            //                         },
+            //                         orderBy: { createdAt: "asc" }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     },
+            //     _count: {
+            //         select: { comments: true }
+            //     }
+            // }
+        })
+        return postData
+    })
+}
+
 export const postService={
     createPost,
-    getAllPost
+    getAllPost,
+    getPostById
 }

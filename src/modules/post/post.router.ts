@@ -7,4 +7,9 @@ router.get("/",PostController.getAllPost)
 
 router.post("/",PostController.createPost);
 
+router.get(
+    "/:postId",
+    PostController.getPostById
+)
+
 export const postRouter: Router=router ;

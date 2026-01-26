@@ -6,8 +6,14 @@ import cors from "cors"
 import { commentRouter } from "./modules/comments/comment.router";
 
 const app: Application=express();
+
+const allowedOrigins = [
+  "http://localhost:4000",
+  "http://localhost:3001",
+];
+
 app.use(cors({
-    origin:process.env.APP_URL || "http://localhost:4000",
+    origin:process.env.APP_URL || allowedOrigins,
     credentials:true
 }))
 
